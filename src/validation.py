@@ -41,7 +41,7 @@ def validation_nocaps(
         eval_rt = json.load(f)
 
     test_rt_id = [k for k, v in eval_rt.items()]
-    test_rt_caps = [i for k, v in eval_rt.items() for i in v[:5]]
+    test_rt_caps = [i for k, v in eval_rt.items() for i in v[:args.k]]
 
     ## captions to clip features
     bs = 1000
