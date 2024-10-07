@@ -1,0 +1,11 @@
+clip @ git+https://github.com/openai/CLIP.git@a9b1bf5920416aaeaec965c25dd9e8f98c864f16
+ipdb==0.13.13
+matplotlib==3.7.1
+nltk==3.8.1
+numpy==1.24.1
+pandas==2.0.0
+Pillow==10.4.0
+scikit-image
+torch==2.4.1
+tqdm==4.66.5
+transformers==4.19.2

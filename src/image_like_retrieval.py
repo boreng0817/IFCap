@@ -24,8 +24,8 @@ def get_captions_path(domain):
 
 def get_image_path(domain):
     datasets = {
-            'coco' : 'COCO_2014/VAL2014_DATAPATH',
-            'flickr30k' : 'FLICKR30K_DATAPATH',
+            'coco' : './annotations/coco/val2014/',
+            'flickr30k' : './annotations/flickr30k/flickr30k-images',
             }
     return datasets[domain]
 
@@ -116,7 +116,7 @@ def main():
     parser.add_argument('--K', type = int, default = 5, help = 'The number of retrieved captions for Entity Filtering')
     parser.add_argument('--variance', type = float, default = 0.04, help = 'Variance for noise injection')
     parser.add_argument('--domain', default = 'coco', help = 'Name of source dataset', choices=['coco', 'flickr30k'])
-    parser.add_argument('--device', default = 'cuda:1', help = 'Cuda device')
+    parser.add_argument('--device', default = 'cuda:3', help = 'Cuda device')
     parser.add_argument('--variant', default = 'RN50x64', help = 'CLIP variant')
 
     args = parser.parse_args()
@@ -131,7 +131,7 @@ def main():
     image_path = get_image_path(args.domain)
 
     train_output_path = f'./annotations/{args.domain}/{args.domain}_train_seed{args.seed}_var{args.variance}.json'
-    test_output_path = f'./annotations/{args.domain}/caption_{args.domain}_test_{args.L}.json'
+    test_output_path = f'./annotations/retrieved_sentences/caption_{args.domain}_test_{args.L}.json'
     clip_feature_path = f'./annotations/{args.domain}/text_feature_clip{args.variant}.pickle'
 
     train_captions = load_captions(datasets, captions_path)

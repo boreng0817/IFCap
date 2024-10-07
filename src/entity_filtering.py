@@ -31,12 +31,14 @@ def main(captions, path: str) -> None:
 
 if __name__ == '__main__':
     captions_path = [
-            'annotations/coco/caption_coco_test_9.json',
+            'annotations/retrieved_sentences/caption_coco_test_9.json',
+            'annotations/retrieved_sentences/caption_flickr30k_test_7.json',
             ]
     out_path = [
-            'annotations/retrieved_entity/image_coco_caption_coco.json',
+            'annotations/retrieved_entity/image_coco_caption_coco_9.json',
+            'annotations/retrieved_entity/image_flickr30k_caption_flickr30k_7.json',
             ]
-    IDX = 0
+    IDX = 1
 
     with open(captions_path[IDX], 'r') as file:
         captions = json.load(file)
