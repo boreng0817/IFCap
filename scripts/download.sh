@@ -12,8 +12,7 @@ done
 
 for f in annotations.zip checkpoints.zip evaluation.zip inference_result.zip;
 do
-    d=$(echo "${f%%.*}")
-    unzip $f -d $d;
+    unzip $f
 done
 
 rm *.zip
