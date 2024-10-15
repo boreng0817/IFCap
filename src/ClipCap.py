@@ -182,44 +182,6 @@ class MappingNetwork(nn.Module):
 
         return outputs
 
-
-class MappingNetwork_only_entities(nn.Module):
-
-    def __init__(
-            self,
-            clip_project_length: int,
-            clip_hidden_size: int,
-            prefix_length: int,
-            d_model: int,  # the hidden size of language model
-            num_layers: int = 8,
-            num_heads: int = 8,
-            k: int = 3
-    ) -> None:
-        super(MappingNetwork_only_entities, self).__init__()
-        self.clip_project_length = clip_project_length
-        # projector for input
-        self.linear = nn.Linear(clip_hidden_size, clip_project_length * d_model)
-
-        # learnable prefix embeddings
-        self.prefix_const = nn.Parameter(torch.randn(prefix_length, d_model), requires_grad=True)
-        self.transformer = Transformer(d_model, num_layers, num_heads)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x: clip cls feature with a shape of (batch_size, clip_hidden_size)
-        Return:
-            the embeddings of prefix with the shape of (batch_size, prefix_length, d_model)
-        """
-        x = self.linear(x).view(x.shape[0], self.clip_project_length, -1)  # (b, clip_project_length, d_model)
-        prefix = self.prefix_const.unsqueeze(dim=0).expand(x.shape[0], *self.prefix_const.shape)  # (b, prefix_length, d_model)
-        inputs = torch.cat((x, prefix), dim=1)  # (b, clip_project_length + prefix_length, d_model)
-        outputs = self.transformer(inputs)[:, self.clip_project_length:, :]  # (b, prefix_length, d_model)
-
-        return outputs
-
-
-
 def get_language_mode(lm_type):
     if 'gpt' in lm_type:
         model = GPT2LMHeadModel.from_pretrained(lm_type)
@@ -262,10 +224,7 @@ class ClipCaptionModel(nn.Module):
         self.only_hard_prompt = only_hard_prompt
         self.continuous_length = continuous_length
         self.gpt, self.gpt_hidden_size = get_language_mode(gpt_type)
-        if args.use_only_rt_entities:
-            self.mapping_network = MappingNetwork_only_entities(clip_project_length, clip_hidden_size, continuous_length, self.gpt_hidden_size, num_layers, num_heads)
-        else:
-            self.mapping_network = MappingNetwork(clip_project_length, clip_hidden_size, continuous_length, self.gpt_hidden_size, num_layers, num_heads, k, args.device)
+        self.mapping_network = MappingNetwork(clip_project_length, clip_hidden_size, continuous_length, self.gpt_hidden_size, num_layers, num_heads, k, args.device)
         self.gpt_type = gpt_type
         self.args = args
 
@@ -296,10 +255,7 @@ class ClipCaptionModel(nn.Module):
         """
         caption_embeddings = self.word_embed(caption_tokens) # caption_tokens = captions_tokens_with_hard_prompts
 
-        if self.args.use_only_rt_entities:
-            continuous_embeddings = self.mapping_network(continuous_prompt).view(-1, self.continuous_length, self.gpt_hidden_size) # (b, continuous_length, gpt_hidden_size)
-        else:
-            continuous_embeddings = self.mapping_network(continuous_prompt, retrieved_features)#.view(-1, self.continuous_length, self.gpt_hidden_size) # (b, continuous_length, gpt_hidden_size)
+        continuous_embeddings = self.mapping_network(continuous_prompt, retrieved_features)#.view(-1, self.continuous_length, self.gpt_hidden_size) # (b, continuous_length, gpt_hidden_size)
 
         if hard_prompts_length is not None:   # with hard prompts
             if self.only_hard_prompt:

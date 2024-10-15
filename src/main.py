@@ -142,13 +142,7 @@ def main():
     parser.add_argument('--disable_random_seed', action = 'store_true', default = False, help = 'set random seed for reproducing')
     parser.add_argument('--random_seed', type = int, default = 30, help = 'set random seed for reproducing')
     # parser.add_argument("--prefix", type=str, default="prefix prefix prefix:")
-    parser.add_argument('--use_rt_entities', action='store_true', default=False, help="True -> Use retrieved captions' entities")
-    parser.add_argument('--use_only_rt_entities', action='store_true', default=False,
-                        help="True -> Use retrieved captions' entities")
-    parser.add_argument('--use_rt_prompt', action='store_true', default=True,
-                        help="True -> Use retrieved captions' entities")
-    parser.add_argument('--rt_path', default='./annotations/coco/rt_add_noise_image_caps_test_seed107.json',
-                        help="True -> Use retrieved captions' entities")
+    parser.add_argument('--rt_path', default='./annotations/coco/coco_train_seed30_var0.04.json')
 
     args = parser.parse_args()
 
