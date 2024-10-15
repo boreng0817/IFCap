@@ -34,8 +34,16 @@ python src/entity_filtering.py # with IDX=1
 ```
 
 ### Training
+For COCO,
 ```
-# Will be added very soon.
+# bash scripts/train_coco.sh CUDA_DEVICE TEST_NAME RT_PATH
+bash scripts/train_coco.sh 0 coco annotations/coco/coco_train_seed30_var0.04.json
+```
+
+For Flickr30k
+```
+# bash scripts/train_flickr30k.sh CUDA_DEVICE TEST_NAME RT_PATH
+bash scripts/train_flickr30k.sh 0 flickr annotations/flickr30k/flickr30k_train_seed30_var0.04.json
 ```
 
 ### Inference
