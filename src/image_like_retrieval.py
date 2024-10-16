@@ -18,14 +18,15 @@ def get_captions_path(domain):
     datasets = {
             'coco' : './annotations/coco/train_captions.json',
             'flickr30k' : './annotations/flickr30k/train_captions.json',
+            'nocaps' : './annotations/nocaps/nocaps_corpus.json',
             }
-
     return datasets[domain]
 
 def get_image_path(domain):
     datasets = {
             'coco' : './annotations/coco/val2014/',
-            'flickr30k' : './annotations/flickr30k/flickr30k-images',
+            'flickr30k' : './annotations/flickr30k/flickr30k-images/',
+            'nocaps' : './annotations/nocaps/images/',
             }
     return datasets[domain]
 
@@ -115,9 +116,11 @@ def main():
     parser.add_argument('--L', type = int, default = 9, help = 'The number of retrieved captions for Image Like Retrieval')
     parser.add_argument('--K', type = int, default = 5, help = 'The number of retrieved captions for Entity Filtering')
     parser.add_argument('--variance', type = float, default = 0.04, help = 'Variance for noise injection')
-    parser.add_argument('--domain', default = 'coco', help = 'Name of source dataset', choices=['coco', 'flickr30k'])
-    parser.add_argument('--device', default = 'cuda:3', help = 'Cuda device')
+    parser.add_argument('--domain_test', default = 'coco', help = 'Name of test dataset', choices=['coco', 'flickr30k', 'nocaps'])
+    parser.add_argument('--domain_source', default = 'coco', help = 'Name of source dataset', choices=['coco', 'flickr30k'])
+    parser.add_argument('--device', default = 'cuda:1', help = 'Cuda device')
     parser.add_argument('--variant', default = 'RN50x64', help = 'CLIP variant')
+    parser.add_argument('--test_only', action = 'store_true', help = 'No ILR')
 
     args = parser.parse_args()
 
@@ -126,23 +129,31 @@ def main():
     set_seed(args.seed)
     clip_model, preprocess = clip.load(args.variant, device=args.device)
 
-    captions_path = get_captions_path(args.domain)
-    datasets = f'{args.domain}_captions'
-    image_path = get_image_path(args.domain)
+    captions_path = get_captions_path(args.domain_source)
+    datasets = f'{args.domain_source}_captions'
+    image_path = get_image_path(args.domain_test)
 
-    train_output_path = f'./annotations/{args.domain}/{args.domain}_train_seed{args.seed}_var{args.variance}.json'
-    test_output_path = f'./annotations/retrieved_sentences/caption_{args.domain}_test_{args.L}.json'
-    clip_feature_path = f'./annotations/{args.domain}/text_feature_clip{args.variant}.pickle'
+    train_output_path = f'./annotations/{args.domain_test}/{args.domain_test}_train_seed{args.seed}_var{args.variance}.json'
+    test_output_path = f'./annotations/retrieved_sentences/caption_{args.domain_source}_image_{args.domain_test}_{args.L}.json'
+    clip_feature_path = f'./annotations/{args.domain_source}/text_feature_clip{args.variant}.pickle'
+    print('train_output_path', train_output_path)
+    print('test_output_path', test_output_path)
+    print('clip_feature_path', clip_feature_path)
 
     train_captions = load_captions(datasets, captions_path)
     caption_features = load_caption_features(clip_feature_path, train_captions, args).to(args.device)
     caption_features = caption_features / caption_features.norm(dim=-1, keepdim=True)
 
-    with open(f"./annotations/{args.domain}/test_captions.json", 'r') as f:
+    with open(f"./annotations/{args.domain_test}/test_captions.json", 'r') as f:
         annotations = json.load(f)
 
-    image_like_retrieval_train(train_captions, train_output_path, caption_features, args)
-    retrieve_caption_test(image_path, annotations, train_captions, test_output_path, caption_features, args)
+    if not args.test_only and not os.path.exists(train_output_path):
+        print('Perform image-like retrieval')
+        image_like_retrieval_train(train_captions, train_output_path, caption_features, args)
+
+    if not os.path.exists(test_output_path):
+        print('Perform image-to-text retrieval')
+        retrieve_caption_test(image_path, annotations, train_captions, test_output_path, caption_features, args)
 
 if __name__=='__main__':
     main()

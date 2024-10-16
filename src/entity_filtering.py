@@ -30,16 +30,17 @@ def main(captions, path: str) -> None:
         json.dump(new_captions, file)
 
 if __name__ == '__main__':
-    captions_path = [
-            'annotations/retrieved_sentences/caption_coco_test_9.json',
-            'annotations/retrieved_sentences/caption_flickr30k_test_7.json',
-            ]
-    out_path = [
-            'annotations/retrieved_entity/image_coco_caption_coco_9.json',
-            'annotations/retrieved_entity/image_flickr30k_caption_flickr30k_7.json',
-            ]
-    IDX = 1
 
-    with open(captions_path[IDX], 'r') as file:
+    IDX = 0
+    inputs = [
+            "caption_coco_image_coco_9.json",
+            "caption_flickr30k_image_flickr30k_7.json",
+            "caption_coco_image_nocaps_7.json",
+            ]
+
+    captions_path = f'annotations/retrieved_sentences/{inputs[IDX]}'
+    out_path = f'annotations/retrieved_entity/{inputs[IDX]}'
+
+    with open(captions_path, 'r') as file:
         captions = json.load(file)
-    main(captions, out_path[IDX])
+    main(captions, out_path)

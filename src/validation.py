@@ -34,10 +34,10 @@ def validation_nocaps(
     else:
         with open(inpath, 'r') as infile:
             annotations = json.load(infile) # [{'split': 'near_domain', 'image_id': '4499.jpg', 'caption': [caption1, caption2, ...]}, ...]
-    if args.ef_entity_path is not None:
-        with open(f'annotations/retrieved_entity/{args.ef_entity_path}', 'r') as f:
+    if args.entity_filtering:
+        with open(f'annotations/retrieved_entity/{args.retrieved_info}', 'r') as f:
             retrieved_entities = json.load(f)
-    with open(f'annotations/retrieved_sentences/{args.rt_sentence_path}', 'r') as f:
+    with open(f'annotations/retrieved_sentences/{args.retrieved_info}', 'r') as f:
         eval_rt = json.load(f)
 
     test_rt_id = [k for k, v in eval_rt.items()]
@@ -46,7 +46,7 @@ def validation_nocaps(
     ## captions to clip features
     bs = 1000
     rt_feats = []
-    for idx in tqdm(range(0, len(test_rt_caps), bs)):
+    for idx in range(0, len(test_rt_caps), bs):
         caps = test_rt_caps[idx:idx + bs]
         with torch.no_grad():
             rt_feat_batch = encoder.encode_text(clip.tokenize(caps).to(device))
@@ -63,7 +63,7 @@ def validation_nocaps(
     neardomain = []
     outdomain = []
     overall = []
-    for idx, annotation in tqdm(enumerate(annotations)):
+    for idx, annotation in tqdm(enumerate(annotations), total=len(annotations)):
         if args.using_image_features:
             image_id, split, image_features, captions = annotation
             image_features = image_features.float().unsqueeze(dim = 0).to(device)
@@ -160,10 +160,10 @@ def validation_coco_flickr30k(
     else:
         with open(inpath, 'r') as infile:
             annotations = json.load(infile)   # {image_path: [caption1, caption2, ...]}
-    if args.ef_entity_path is not None:
-        with open(f'annotations/retrieved_entity/{args.ef_entity_path}', 'r') as f:
+    if args.entity_filtering:
+        with open(f'annotations/retrieved_entity/{args.retrieved_info}', 'r') as f:
             retrieved_entities = json.load(f)
-    with open(f'annotations/retrieved_sentences/{args.rt_sentence_path}', 'r') as f:
+    with open(f'annotations/retrieved_sentences/{args.retrieved_info}', 'r') as f:
         eval_rt = json.load(f)
 
     test_rt_id = [l[0] for l in annotations]
@@ -186,7 +186,7 @@ def validation_coco_flickr30k(
 
 
     predicts = []
-    for idx, item in tqdm(enumerate(annotations)):
+    for idx, item in tqdm(enumerate(annotations), total=len(annotations)):
         if args.using_image_features:
             image_id, image_features, captions = item
             image_features = image_features.float().unsqueeze(dim = 0).to(device) # (1, clip_hidden_size)
@@ -346,14 +346,10 @@ if __name__ == '__main__':
     parser.add_argument('--debug', action = 'store_true')
     parser.add_argument('--text_prompt', type = str, default = None)
     parser.add_argument('--k', type=int, default=5)
-    parser.add_argument('--use_only_rt_entities', action='store_true', default=False,
-                        help="True -> Use retrieved captions' entities")
     parser.add_argument('--entity_filtering', action = 'store_true', default=False)
     parser.add_argument('--K', type = int, default=0)
-    parser.add_argument('--domain', type = str, default='coco')
-    parser.add_argument('--ef_entity_path', type = str, default='image_coco_caption_coco.json')
-    parser.add_argument('--rt_sentence_path', type = str, default='image_flickr_caption_coco_rn50x64.json')
-    parser.add_argument('--adaptive_ef', type = str, default="")
+    parser.add_argument('--retrieved_info', type = str, default='caption_coco_image_coco_9.json')
+    parser.add_argument('--adaptive_ef', type = str, default="", choices=['', 'normal', 'log_normal'])
 
     args = parser.parse_args()
     print('args: {}\n'.format(vars(args)))

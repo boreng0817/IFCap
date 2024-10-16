@@ -35,7 +35,6 @@ python src/validation.py \
 --using_hard_prompt \
 --soft_prompt_first \
 --k 5 \
---domain coco \
 $OTHER_ARGS \
 
 echo "==========================COCO EVAL================================"
