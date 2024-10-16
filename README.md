@@ -17,6 +17,8 @@ bash scripts/download.sh
 
 For COCO,
 ```
+# place your coco images in annotations/coco/val2014
+
 # image-like retrieval
 python src/image_like_retrieval.py
 
@@ -26,11 +28,24 @@ python src/entity_filtering.py # with IDX=0
 
 For Flickr30k,
 ```
+# place your flickr30k images in annotations/flickr30k/flickr30k-images
+
 # image-like retrieval
-python src/image_like_retrieval.py --domain flickr30k --L 7
+python src/image_like_retrieval.py --domain_source flickr30k --domain_test flickr30k --L 7
 
 # entity filtering
 python src/entity_filtering.py # with IDX=1
+```
+
+For NoCaps,
+```
+# download images of NoCaps validation
+# In my case, it took about 2 hours.
+cd annotations/nocaps/
+python download.py 
+
+# image-to-text retrieval
+python src/image_like_retrieval.py --test_only --domain_test nocaps --L 7
 ```
 
 ### Training
@@ -47,22 +62,45 @@ bash scripts/train_flickr30k.sh 0 flickr annotations/flickr30k/flickr30k_train_s
 ```
 
 ### Inference
-For COCO,
+[COCO]
 ```
 bash scripts/eval_coco.sh train_coco 0 \
-	'--entity_filtering --ef_entity_path image_coco_caption_coco_9.json --rt_sentence_path caption_coco_test_9.json --K 5' \
+	'--entity_filtering --retrieved_info caption_coco_image_coco_9.json --K 5' \
 	coco-indomain \
 	4
 ```
 
-For Flickr30k,
+[Flickr30k]
 ```
 bash scripts/eval_flickr30k.sh train_flickr30k 0 \
-	'--entity_filtering --ef_entity_path image_flickr30k_caption_flickr30k_7.json --rt_sentence_path caption_flickr30k_test_7.json --K 3' \
+	'--entity_filtering --retrieved_info caption_flickr30k_image_flickr30k_7.json --K 3' \
 	flickr-indomain \
 	14
 ```
 
+[NoCaps]
+```
+bash scripts/eval_nocaps.sh train_coco 0 \
+	'--retrieved_info caption_coco_image_nocaps_7.json' \
+	coco-indomain \
+	5
+```
+
+[COCO -> Flickr30k]
+```
+bash scripts/eval_flickr30k.sh train_coco 0 \
+	'--entity_filtering --retrieved_info caption_flickr30k_image_flickr30k_7.json --K 3' \
+	coco-indomain \
+	5
+```
+
+[Flickr30k -> COCO]
+```
+bash scripts/eval_coco.sh train_flickr30k 0 \
+	'--entity_filtering --retrieved_info caption_coco_image_coco_9.json --K 4' \
+	flickr-indomain \
+	14
+```
 
 ## Citation
 If you use this code for your research, please cite:
