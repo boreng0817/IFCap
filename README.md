@@ -1,6 +1,8 @@
 # IFCap
 IFCap: Image-like Retrieval and Frequency-based Entity Filtering for Zero-shot Captioning, EMNLP2024
 
+[poster_emnlp.pdf](https://github.com/user-attachments/files/17690695/poster_emnlp.pdf)
+
 ---
 ### Conda environment
 ```bash
