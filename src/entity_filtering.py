@@ -31,11 +31,13 @@ def main(captions, path: str) -> None:
 
 if __name__ == '__main__':
 
-    IDX = 0
+    IDX = 4
     inputs = [
             "caption_coco_image_coco_9.json",
             "caption_flickr30k_image_flickr30k_7.json",
             "caption_coco_image_nocaps_7.json",
+            "caption_msrvtt_image_msrvtt_7.json",
+            "caption_msvd_image_msvd_7.json",
             ]
 
     captions_path = f'annotations/retrieved_sentences/{inputs[IDX]}'

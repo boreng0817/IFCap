@@ -26,17 +26,13 @@ def main(captions: List[str], path: str) -> None:
     
 
 if __name__ == '__main__':
-    datasets = ['coco_captions', 'flickr30k_captions']
-    captions_path = [
-        './annotations/coco/train_captions.json',
-        './annotations/flickr30k/train_captions.json'
-    ]
-    out_path = [
-        './annotations/coco/coco_with_entities.pickle',
-        './annotations/flickr30k/flickr30k_with_entities.pickle'
-    ]
-    
-    idx = 1 # only need to change here! 0 -> coco training data, 1 -> flickr30k training data
+
+    idx = 3 # only need to change here! 0 -> coco training data, 1 -> flickr30k training data
+    datasets = ['coco', 'flickr30k', 'msvd', 'msrvtt'][idx]
+
+    captions_path = f'./annotations/{datasets}/train_captions.json'
+    out_path = f'./annotations/{datasets}/{datasets}_with_entities.pickle'
+    datasets += '_captions'
     
     if os.path.exists(out_path[idx]):
         print('Read!')
@@ -49,5 +45,5 @@ if __name__ == '__main__':
         
     else:
         print('Writing... ...')
-        captions = load_captions(datasets[idx], captions_path[idx])
-        main(captions, out_path[idx])
+        captions = load_captions(datasets, captions_path)
+        main(captions, out_path)

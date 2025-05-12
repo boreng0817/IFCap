@@ -3,6 +3,26 @@ import pickle
 import pandas as pd
 from typing import List
 
+def base_load_captions(path: str) -> List[str]:
+
+    with open(path, 'r') as infile:
+        annotations = json.load(infile)               # dictionary -> {image_path: List[caption1, caption2, ...]}
+    punctuations = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', ' ', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+
+    captions = []
+    for image_path in annotations:                  
+        temp_captions = annotations[image_path]        # List: [caption1, caption2, ...], captions for the ith image
+        for caption in temp_captions:                  # caption
+            caption = caption.strip()                  # removing space at the end of the caption
+            if caption.isupper():                      # processing the special caption in the COCO Caption, e.g., 'A BOY IS PLAYING BASEBALL.'
+                caption = caption.lower()
+            caption = caption[0].upper() + caption[1:] # capitalizing the first letter in the caption
+            if caption[-1] not in punctuations:        # adding a '.' at the end of the caption if there are no punctuations.
+                caption += '.'
+            captions.append(caption)                   # final versin: A boy is playing baseball.
+
+    return captions
+
 def load_coco_captions(path: str) -> List[str]:
 
     with open(path, 'r') as infile:
@@ -56,6 +76,12 @@ def load_captions(name_of_datasets: str, path_of_datasets: str) -> List[str]:
 
     if name_of_datasets == 'flickr30k_captions':
         return load_flickr30k_captions(path_of_datasets)
+
+    if name_of_datasets == 'msvd_captions':
+        return base_load_captions(path_of_datasets)
+
+    if name_of_datasets == 'msrvtt_captions':
+        return base_load_captions(path_of_datasets)
 
     print('The datasets for training fail to load!')
 

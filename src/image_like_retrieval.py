@@ -19,6 +19,8 @@ def get_captions_path(domain):
             'coco' : './annotations/coco/train_captions.json',
             'flickr30k' : './annotations/flickr30k/train_captions.json',
             'nocaps' : './annotations/nocaps/nocaps_corpus.json',
+            'msvd' : './annotations/msvd/train_captions.json',
+            'msrvtt' : './annotations/msrvtt/train_captions.json',
             }
     return datasets[domain]
 
@@ -27,6 +29,8 @@ def get_image_path(domain):
             'coco' : './annotations/coco/val2014/',
             'flickr30k' : './annotations/flickr30k/flickr30k-images/',
             'nocaps' : './annotations/nocaps/images/',
+            'msvd' : './annotations/msvd/frames/',
+            'msrvtt' : './annotations/msrvtt/frames/',
             }
     return datasets[domain]
 
@@ -87,12 +91,32 @@ def retrieve_caption_test(image_path, annotations, train_captions, output_path, 
     image_ids = list(annotations.keys())
     image_features = []
     with torch.no_grad():
-        for idx in tqdm(range(0, len(image_ids), bs)):
-            image_input = [preprocess(Image.open(os.path.join(image_path, i)))
-                           for i in image_ids[idx:idx + bs]]
-            image_features.append(clip_model.encode_image(torch.tensor(np.stack(image_input)).to(args.device)))
+
+        # =================================== MSVD MSRVTT ===================================
+        import pdb;pdb.set_trace()
+        if args.video:
+            for video in tqdm(image_ids):
+                im_path = os.path.join(image_path, video)
+                image_input = [preprocess(Image.open(os.path.join(im_path, i)))
+                               for i in os.listdir(im_path)]
+                video_feature = clip_model.encode_image(torch.tensor(np.stack(image_input)).to(args.device))
+                video_feature = torch.mean(video_feature, dim=0).unsqueeze(0)
+                image_features.append(video_feature)
+            pass
+
+        # ===================================================================================
+
+        # ============================== COCO FLICKR30K NOCAPS ==============================
+        else:
+            for idx in tqdm(range(0, len(image_ids), bs)):
+                image_input = [preprocess(Image.open(os.path.join(image_path, i)))
+                               for i in image_ids[idx:idx + bs]]
+                image_features.append(clip_model.encode_image(torch.tensor(np.stack(image_input)).to(args.device)))
+        # ===================================================================================
+
         image_features = torch.concat(image_features)
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+
 
         retrieved_captions = {}
 
@@ -116,11 +140,12 @@ def main():
     parser.add_argument('--L', type = int, default = 9, help = 'The number of retrieved captions for Image Like Retrieval')
     parser.add_argument('--K', type = int, default = 5, help = 'The number of retrieved captions for Entity Filtering')
     parser.add_argument('--variance', type = float, default = 0.04, help = 'Variance for noise injection')
-    parser.add_argument('--domain_test', default = 'coco', help = 'Name of test dataset', choices=['coco', 'flickr30k', 'nocaps'])
-    parser.add_argument('--domain_source', default = 'coco', help = 'Name of source dataset', choices=['coco', 'flickr30k'])
-    parser.add_argument('--device', default = 'cuda:1', help = 'Cuda device')
+    parser.add_argument('--domain_test', default = 'coco', help = 'Name of test dataset', choices=['coco', 'flickr30k', 'nocaps', 'msvd', 'msrvtt'])
+    parser.add_argument('--domain_source', default = 'coco', help = 'Name of source dataset', choices=['coco', 'flickr30k', 'msvd', 'msrvtt'])
+    parser.add_argument('--device', default = 'cuda:0', help = 'Cuda device')
     parser.add_argument('--variant', default = 'RN50x64', help = 'CLIP variant')
     parser.add_argument('--test_only', action = 'store_true', help = 'No ILR')
+    parser.add_argument('--video', action = 'store_true', help = 'Video dataset')
 
     args = parser.parse_args()
 

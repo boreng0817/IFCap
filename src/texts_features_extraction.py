@@ -25,27 +25,25 @@ def main(device: str, clip_type: str, inpath: str, outpath: str):
     return captions_with_entities
 
 if __name__ == '__main__':
-    
-    idx = 1 # change here! 0 -> coco training data, 1 -> flickr30k training data
-    device = 'cuda:1'
+
+    device = 'cuda:0'
     clip_type = 'ViT-B/32' # change here for different clip backbone (ViT-B/32, RN50x4)
     clip_name = clip_type.replace('/', '')
 
-    inpath = [
-    './annotations/coco/coco_with_entities.pickle',
-    './annotations/flickr30k/flickr30k_with_entities.pickle']
-    outpath = [
-    f'./annotations/coco/coco_texts_features_{clip_name}.pickle',
-    f'./annotations/flickr30k/flickr30k_texts_features_{clip_name}.pickle']
+    idx = 3 # change here! 0 -> coco training data, 1 -> flickr30k training data
+    datasets = ['coco', 'flickr30k', 'msvd', 'msrvtt'][idx]
+    inpath = f'./annotations/{datasets}/{datasets}_with_entities.pickle'
+    outpath = f'./annotations/{datasets}/{datasets}_texts_features_{clip_name}.pickle'
+    
 
-    if os.path.exists(outpath[idx]):
-        with open(outpath[idx], 'rb') as infile:
+    if os.path.exists(outpath):
+        with open(outpath, 'rb') as infile:
             captions_with_features = pickle.load(infile)
     else:
-        captions_with_features = main(device, clip_type, inpath[idx], outpath[idx])
+        captions_with_features = main(device, clip_type, inpath, outpath)
 
     import random
-    print(f'datasets for {inpath[idx]}')
+    print(f'datasets for {inpath}')
     print(f'The length of datasets: {len(captions_with_features)}')
     idx = random.randint(0, len(captions_with_features) - 1)
     caption_with_features = captions_with_features[idx]
