@@ -50,6 +50,28 @@ python download.py
 python src/image_like_retrieval.py --test_only --domain_test nocaps --L 7
 ```
 
+For MSVD and MSRVTT
+```
+# download images of NoCaps validation
+# In my case, it took about 2 hours.
+cd annotations/{msvd, msrvtt}
+python build_dataset/build_dataset.py
+
+# Place corresponding videos in annotations/{msvd, msrvtt}/videos
+cd ../..
+python src/sample_frame.py # idx 0 for MSVD, 1 for MSRVTT
+
+# For extracting feature
+python src/entities_extraction.py # idx 2 for MSVD, 3 for MSRVTT
+python src/texts_features_extraction.py # idx 2 for MSVD, 3 for MSRVTT
+python src/video_features_extraction.py # idx 0 for MSVD, 1 for MSRVTT
+
+
+# image-to-text retrieval
+python src/image_like_retrieval.py --domain_source msvd --domain_test msvd --video --L 7
+python src/image_like_retrieval.py --domain_source msrvtt --domain_test msrvtt --video --L 7
+```
+
 ### Training
 For COCO,
 ```
@@ -61,6 +83,18 @@ For Flickr30k
 ```
 # bash scripts/train_flickr30k.sh CUDA_DEVICE TEST_NAME RT_PATH
 bash scripts/train_flickr30k.sh 0 flickr annotations/flickr30k/flickr30k_train_seed30_var0.04.json
+```
+
+For MSVD
+```
+# bash scripts/train_msvd.sh CUDA_DEVICE TEST_NAME RT_PATH
+bash scripts/train_msvd.sh 0 msvd annotations/msvd/msvd_train_seed30_var0.04.json
+```
+
+For MSRVTT
+```
+# bash scripts/train_msrvtt.sh CUDA_DEVICE TEST_NAME RT_PATH
+bash scripts/train_msrvtt.sh 0 msrvtt annotations/msrvtt/msrvtt_train_seed30_var0.04.json
 ```
 
 ### Inference
@@ -102,6 +136,16 @@ bash scripts/eval_coco.sh train_flickr30k 0 \
 	'--entity_filtering --retrieved_info caption_coco_image_coco_9.json --K 4' \
 	flickr-indomain \
 	14
+```
+
+[MSVD]
+```
+bash scripts/eval_msvd.sh train_msvd 0 '' msvd 9
+```
+
+[MSRVTT]
+```
+bash scripts/eval_msrvtt.sh train_msrvtt 0 '' msrvtt 9
 ```
 
 ## Citation
