@@ -52,8 +52,6 @@ python src/image_like_retrieval.py --test_only --domain_test nocaps --L 7
 
 For MSVD and MSRVTT
 ```
-# download images of NoCaps validation
-# In my case, it took about 2 hours.
 cd annotations/{msvd, msrvtt}
 python build_dataset/build_dataset.py
 
