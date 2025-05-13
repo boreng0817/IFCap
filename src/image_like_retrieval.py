@@ -93,7 +93,6 @@ def retrieve_caption_test(image_path, annotations, train_captions, output_path, 
     with torch.no_grad():
 
         # =================================== MSVD MSRVTT ===================================
-        import pdb;pdb.set_trace()
         if args.video:
             for video in tqdm(image_ids):
                 im_path = os.path.join(image_path, video)
