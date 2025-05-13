@@ -17,7 +17,6 @@ def main(encoder, proprecess, dataset, clip_name):
     annotations = json.load(open(annotation_path, 'r'))
     
     results = []
-    import pdb;pdb.set_trace()
     for video in tqdm(annotations):
         caption = annotations[video]
         image_paths = rootpath + video
