@@ -68,6 +68,9 @@ python src/video_features_extraction.py # idx 0 for MSVD, 1 for MSRVTT
 # image-to-text retrieval
 python src/image_like_retrieval.py --domain_source msvd --domain_test msvd --video --L 7
 python src/image_like_retrieval.py --domain_source msrvtt --domain_test msrvtt --video --L 7
+
+# entity filtering
+python src/entity_filtering.py # with idx 3 for MSVD, 4 for MSRVTT
 ```
 
 ### Training
